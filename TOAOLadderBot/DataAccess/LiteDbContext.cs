@@ -46,6 +46,7 @@ namespace TOAOLadderBot.DataAccess
             }
             catch (LiteException e)
             {
+                // TODO: Handle more gracefully?
                 Debugger.Break();
                 Console.WriteLine(e);
                 Database.Rollback();

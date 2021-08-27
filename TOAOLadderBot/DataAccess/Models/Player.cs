@@ -1,11 +1,12 @@
+using System;
 using System.Collections.Generic;
 using LiteDB;
 
 namespace TOAOLadderBot.DataAccess.Models
 {
-    public class Player : ILiteDbDocument
+    public class Player : ILiteDbDocument, IEquatable<Player>
     {
-        public ObjectId Id { get; set; }
+        public ObjectId Id { get; init; }
         
         public string Name { get; set; }
         
@@ -22,5 +23,24 @@ namespace TOAOLadderBot.DataAccess.Models
         
         // TODO: Rank/Tier calculated from score? or based on percentile?
         // TODO: Win Percent
+        public bool Equals(Player other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(Id, other.Id);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Player)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Id != null ? Id.GetHashCode() : 0);
+        }
     }
  }

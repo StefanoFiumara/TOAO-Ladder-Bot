@@ -5,6 +5,6 @@ namespace TOAOLadderBot.DataAccess.Models
     public interface ILiteDbDocument
     {
         [BsonId]
-        ObjectId Id { get; set; }
+        ObjectId Id { get; init; }
     }
 }
