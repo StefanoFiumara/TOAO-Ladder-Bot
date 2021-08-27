@@ -3,7 +3,7 @@ using LiteDB;
 
 namespace TOAOLadderBot.DataAccess.Models
 {
-    public class Player : IDbModel
+    public class Player : ILiteDbDocument
     {
         public ObjectId Id { get; set; }
         

@@ -2,7 +2,7 @@ using LiteDB;
 
 namespace TOAOLadderBot.DataAccess.Models
 {
-    public interface IDbModel
+    public interface ILiteDbDocument
     {
         [BsonId]
         ObjectId Id { get; set; }

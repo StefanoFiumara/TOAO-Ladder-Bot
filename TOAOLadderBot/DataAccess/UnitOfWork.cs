@@ -16,7 +16,7 @@ namespace TOAOLadderBot.DataAccess
             _database = database;
         }
         
-        public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IDbModel
+        public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, ILiteDbDocument
             => new LiteDbRepository<TEntity>(_context, _database);
 
         public int Save() => _context.Save();

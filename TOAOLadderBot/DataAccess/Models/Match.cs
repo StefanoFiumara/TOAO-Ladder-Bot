@@ -5,7 +5,7 @@ using LiteDB;
 
 namespace TOAOLadderBot.DataAccess.Models
 {
-    public class Match : IDbModel
+    public class Match : ILiteDbDocument
     {
         public ObjectId Id { get; set; }
         

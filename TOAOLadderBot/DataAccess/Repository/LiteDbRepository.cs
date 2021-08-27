@@ -6,7 +6,7 @@ using TOAOLadderBot.DataAccess.Models;
 namespace TOAOLadderBot.DataAccess.Repository
 {
     public sealed class LiteDbRepository<T> : IRepository<T> 
-        where T : class, IDbModel
+        where T : class, ILiteDbDocument
     {
         private readonly LiteDbContext _context;
         private readonly LiteDatabase _database;

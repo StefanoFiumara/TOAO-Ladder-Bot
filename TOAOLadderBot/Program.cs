@@ -27,8 +27,7 @@ namespace TOAOLadderBot
 
             _client.Log += Log;
             _client.Ready += OnClientReady;
-
-            // TODO: Move token to config file
+            
             var token = await File.ReadAllTextAsync(TOKEN_FILE);
             await _client.LoginAsync(TokenType.Bot, token);
 
@@ -41,7 +40,8 @@ namespace TOAOLadderBot
         {
             await _client.GetGuild(TOAO_SERVER).GetTextChannel(TEST_CHANNEL).SendMessageAsync("TOAO Ladder Bot Is Now Connected!");
 
-            // TODO: possible to check for missed commands while the bot was offline?
+            // TODO: Possible to check for missed commands while the bot was offline?
+            // TODO: Maybe log each successful match report in the DB with a unique timestamp and check if unprocessed messages exist.
         }
 
         private static Task Log(LogMessage msg)

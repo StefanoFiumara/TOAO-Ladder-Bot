@@ -5,7 +5,7 @@ using TOAOLadderBot.DataAccess.Models;
 namespace TOAOLadderBot.DataAccess.Repository
 {
     public interface IRepository<TEntity>
-        where TEntity : class, IDbModel
+        where TEntity : class, ILiteDbDocument
     {
         ILiteQueryable<TEntity> Query { get; }
 
