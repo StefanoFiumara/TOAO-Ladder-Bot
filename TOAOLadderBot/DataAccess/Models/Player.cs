@@ -7,6 +7,7 @@ namespace TOAOLadderBot.DataAccess.Models
     public class Player : ILiteDbDocument, IEquatable<Player>
     {
         public ObjectId Id { get; init; }
+        public ulong DiscordId { get; init; }
         
         public string Name { get; set; }
         
