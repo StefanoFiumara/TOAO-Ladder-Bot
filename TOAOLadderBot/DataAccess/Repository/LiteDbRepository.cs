@@ -22,8 +22,6 @@ namespace TOAOLadderBot.DataAccess.Repository
         
         public T Create(T entity)
         {
-            // TODO: check if this is necessary or if LiteDB will generate it for us
-            // entity.Id = ObjectId.NewObjectId();
             _context.AddCommand(() =>
             {
                 _database.GetCollection<T>().Insert(entity);

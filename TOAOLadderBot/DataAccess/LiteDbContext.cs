@@ -7,12 +7,12 @@ namespace TOAOLadderBot.DataAccess
 {
     public class LiteDbContext
     {
-        private readonly LiteDatabase _database;
+        public LiteDatabase Database { get; }
         private readonly List<Action> _commands;
 
         public LiteDbContext(LiteDatabase database)
         {
-            _database = database;
+            Database = database;
             _commands = new List<Action>();
         }
         
@@ -30,7 +30,7 @@ namespace TOAOLadderBot.DataAccess
             
             try
             {
-                _database.BeginTrans();
+                Database.BeginTrans();
                 
                 foreach (var command in _commands)
                 {
@@ -40,15 +40,15 @@ namespace TOAOLadderBot.DataAccess
                 int executedCount = _commands.Count;
 
                 _commands.Clear();
-                _database.Commit();
+                Database.Commit();
                 
                 return executedCount;
             }
-            catch (Exception e)
+            catch (LiteException e)
             {
                 Debugger.Break();
                 Console.WriteLine(e);
-                _database.Rollback();
+                Database.Rollback();
                 throw;
             }
         }

@@ -14,8 +14,15 @@ namespace TOAOLadderBot.DataAccess
         {
             _context = context;
             _database = database;
+
+            EnsureIndexes();
         }
-        
+
+        private void EnsureIndexes()
+        {
+            _database.GetCollection<Player>().EnsureIndex(p => p.Name); // TODO: Cleaner way of setting this up?
+        }
+
         public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, ILiteDbDocument
             => new LiteDbRepository<TEntity>(_context, _database);
 

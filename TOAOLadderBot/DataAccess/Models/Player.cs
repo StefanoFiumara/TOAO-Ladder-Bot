@@ -7,7 +7,7 @@ namespace TOAOLadderBot.DataAccess.Models
     {
         public ObjectId Id { get; set; }
         
-        public string Name { get; set; } // TODO: Ensure Index by name
+        public string Name { get; set; }
         
         public int Score { get; set; }
         

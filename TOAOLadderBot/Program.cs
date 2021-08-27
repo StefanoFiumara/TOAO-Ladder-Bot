@@ -38,7 +38,10 @@ namespace TOAOLadderBot
 
         private static async Task OnClientReady()
         {
-            await _client.GetGuild(TOAO_SERVER).GetTextChannel(TEST_CHANNEL).SendMessageAsync("TOAO Ladder Bot Is Now Connected!");
+            await _client
+                .GetGuild(TOAO_SERVER)
+                .GetTextChannel(TEST_CHANNEL)
+                .SendMessageAsync("TOAO Ladder Bot Is Now Connected!");
 
             // TODO: Possible to check for missed commands while the bot was offline?
             // TODO: Maybe log each successful match report in the DB with a unique timestamp and check if unprocessed messages exist.
