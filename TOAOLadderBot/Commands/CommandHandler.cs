@@ -1,11 +1,10 @@
 using System.Reflection;
 using System.Threading.Tasks;
+using Discord.Commands;
 using Discord.WebSocket;
 
-namespace TOAOLadderBot
+namespace TOAOLadderBot.Commands
 {
-    using Discord.Commands;
-
     public class CommandHandler
     {
         private readonly DiscordSocketClient _client;

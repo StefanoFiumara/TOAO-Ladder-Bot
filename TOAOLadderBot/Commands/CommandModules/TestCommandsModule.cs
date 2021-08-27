@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
 using Discord.Commands;
+
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
-namespace TOAOLadderBot.CommandModules
+namespace TOAOLadderBot.Commands.CommandModules
 {
     public class TestCommandsModule : ModuleBase<SocketCommandContext>
     {

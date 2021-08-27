@@ -1,24 +1,45 @@
 using System;
 using System.Linq;
+using LiteDB;
+using TOAOLadderBot.DataAccess.Models;
 
-namespace TOAOLadderBot.DataAccess
+namespace TOAOLadderBot.DataAccess.Repository
 {
-    public sealed class LiteDbRepository<T> : IRepository<T> where T : class
+    public sealed class LiteDbRepository<T> : IRepository<T> 
+        where T : class, IDbModel
     {
-        public IQueryable<T> Query { get; }
+        private readonly LiteDbContext _context;
+        private readonly LiteDatabase _database;
+
+        public ILiteQueryable<T> Query => _database.GetCollection<T>().Query();
+
+        public LiteDbRepository(LiteDbContext context, LiteDatabase database)
+        {
+            _context = context;
+            _database = database;
+
+        }
+        
         public T Create(T entity)
         {
-            throw new NotImplementedException();
+            // TODO: check if this is necessary or if LiteDB will generate it for us
+            // entity.Id = ObjectId.NewObjectId();
+            _context.AddCommand(() =>
+            {
+                _database.GetCollection<T>().Insert(entity);
+            });
+            
+            return entity;
         }
 
-        public T Update(T entity)
+        public bool Update(T entity)
         {
-            throw new NotImplementedException();
+            return _database.GetCollection<T>().Update(entity);
         }
 
-        public void Delete(T entity)
+        public bool Delete(T entity)
         {
-            throw new NotImplementedException();
+            return _database.GetCollection<T>().Delete(entity.Id);
         }
     }
 }

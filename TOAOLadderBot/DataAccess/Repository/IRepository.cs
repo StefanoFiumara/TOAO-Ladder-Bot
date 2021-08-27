@@ -1,17 +1,19 @@
 using System.Linq;
+using LiteDB;
+using TOAOLadderBot.DataAccess.Models;
 
-namespace TOAOLadderBot.DataAccess
+namespace TOAOLadderBot.DataAccess.Repository
 {
     public interface IRepository<TEntity>
-        where TEntity : class
+        where TEntity : class, IDbModel
     {
-        IQueryable<TEntity> Query { get; }
+        ILiteQueryable<TEntity> Query { get; }
 
         TEntity Create(TEntity entity);
 
-        TEntity Update(TEntity entity);
+        bool Update(TEntity entity);
 
-        void Delete(TEntity entity);
+        bool Delete(TEntity entity);
         
     }
 }
