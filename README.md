@@ -4,17 +4,15 @@ A Discord bot to record TOAO Ladder games
 ## Commands (WIP)
 * !report
     * Reports a ladder match
-    * `!report @A defeats @B ***`
+    * `!report @A defeats @B`
         * 1v1 match
         * A is the winner and B is the loser
-        * Remainder of command stored as comments
         * can use 'defeats' or 'defeat' as team delimeter
         * Reporter must be a player that participated in the match
         * Included players must be mentioned by their discord name
-    * `!report @A @B defeat @X @Y ***`
+    * `!report @A @B defeat @X @Y`
         * Team match with each team player separated by a space
         * can use 'defeats' or 'defeat' as team delimeter
-        * Remainder of command stored as comments
         * Reporter must be a player that participated in the match
         * Included players must be mentioned by their discord name
 

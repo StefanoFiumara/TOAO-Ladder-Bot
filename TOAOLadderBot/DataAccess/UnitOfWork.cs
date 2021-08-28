@@ -20,7 +20,9 @@ namespace TOAOLadderBot.DataAccess
 
         private void EnsureIndexes()
         {
-            _database.GetCollection<Player>().EnsureIndex(p => p.Name); // TODO: Cleaner way of setting this up?
+            // TODO: Cleaner way of setting this up?
+            _database.GetCollection<Player>().EnsureIndex(p => p.Name); 
+            _database.GetCollection<Player>().EnsureIndex(p => p.DiscordId);
         }
 
         public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, ILiteDbDocument

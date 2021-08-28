@@ -18,7 +18,7 @@ namespace TOAOLadderBot.DataAccess.Models
         public int Losses { get; set; }
         
         [BsonRef(nameof(Match))]
-        private List<Match> MatchHistory { get; set; }
+        public List<Match> MatchHistory { get; set; }
         
         public int GamesPlayed => Wins + Losses;
         

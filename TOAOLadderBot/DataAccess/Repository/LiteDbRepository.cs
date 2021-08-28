@@ -5,39 +5,58 @@ using TOAOLadderBot.DataAccess.Models;
 
 namespace TOAOLadderBot.DataAccess.Repository
 {
-    public sealed class LiteDbRepository<T> : IRepository<T> 
-        where T : class, ILiteDbDocument
+    public sealed class LiteDbRepository<TEntity> : IRepository<TEntity> 
+        where TEntity : class, ILiteDbDocument
     {
         private readonly LiteDbContext _context;
         private readonly LiteDatabase _database;
 
-        public ILiteQueryable<T> Query => _database.GetCollection<T>().Query();
+        public ILiteQueryable<TEntity> Query => _database.GetCollection<TEntity>().Query();
 
         public LiteDbRepository(LiteDbContext context, LiteDatabase database)
         {
             _context = context;
             _database = database;
-
         }
         
-        public T Create(T entity)
+        public TEntity Create(TEntity entity)
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<T>().Insert(entity);
+                _database.GetCollection<TEntity>().Insert(entity);
             });
             
             return entity;
         }
 
-        public bool Update(T entity)
+        public TEntity Update(TEntity entity)
         {
-            return _database.GetCollection<T>().Update(entity);
+            _context.AddCommand(() =>
+            {
+                _database.GetCollection<TEntity>().Update(entity);
+            });
+
+            return entity;
         }
 
-        public bool Delete(T entity)
+        public TEntity Upsert(TEntity entity)
         {
-            return _database.GetCollection<T>().Delete(entity.Id);
+            _context.AddCommand(() =>
+            {
+                _database.GetCollection<TEntity>().Upsert(entity);
+            });
+
+            return entity;
+        }
+
+        public TEntity Delete(TEntity entity)
+        {
+            _context.AddCommand(() =>
+            {
+                _database.GetCollection<TEntity>().Delete(entity.Id);
+            });
+
+            return entity;
         }
     }
 }

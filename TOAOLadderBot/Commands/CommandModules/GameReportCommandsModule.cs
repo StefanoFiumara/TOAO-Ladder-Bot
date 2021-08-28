@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -10,75 +11,80 @@ namespace TOAOLadderBot.Commands.CommandModules
 {
     public class GameReportCommandsModule : ModuleBase<SocketCommandContext>
     {
-        public Task ReportGameAsync(List<IUser> winners, List<IUser> losers, string comments)
+        private static readonly Emoji OkHand = new("\uD83D\uDC4C");
+        private static readonly Emoji ThumbsDown = new("\uD83D\uDC4E");
+
+        private async Task ReportGameAsync(List<IUser> winners, List<IUser> losers)
         {
-            // TODO: defer to LadderReportingService for actual logic
-            Debugger.Break();
-            return Task.CompletedTask;
+            if (winners.Concat(losers).Any(u => u == Context.User))
+            {
+                // TODO: defer to LadderReportingService for actual logic
+                await Context.Message.AddReactionAsync(OkHand);
+            
+                // TODO: Reply with match details
+                await ReplyAsync($"Thank you {Context.User.Mention}! Your game was reported successfully!");
+            }
+            else
+            {
+                await Context.Message.AddReactionAsync(ThumbsDown);
+                await ReplyAsync($"Sorry {Context.User.Mention}, your report cannot be counted since you are not one of the participants in the match!");
+            }
+            
         }
         
         [Command("report")]
-        public Task ReportGameAsync([Remainder] string text = "")
+        public async Task ReportGameAsync([Remainder] string text = "")
         {
-            // TODO: Reply with command usage info
-            Debugger.Break();
-            return ReplyAsync(".");
+            await Context.Message.AddReactionAsync(ThumbsDown);
+            await ReplyAsync($"Sorry {Context.User.Mention}, your message was not formatted correctly so your report was ignored. Make sure you are following the reporting guidelines!");
         }
         
         [Command("report")]
         [Summary("Reports a ladder game")]
-        public Task ReportGameAsync(
+        public async Task ReportGameAsync(
             IUser winner, 
             string delimeter, 
-            IUser loser, 
-            [Remainder] string comments = "")
+            IUser loser)
         {
-            return ReportGameAsync(
+            await ReportGameAsync(
                 new List<IUser> {winner},
-                new List<IUser> {loser},
-                comments);
+                new List<IUser> {loser});
         }
         
         [Command("report")]
         [Summary("Reports a ladder game")]
-        public Task ReportGameAsync(
+        public async Task ReportGameAsync(
             IUser winner1, IUser winner2, 
             string delimeter, 
-            IUser loser1, IUser loser2, 
-            [Remainder] string comments = "")
+            IUser loser1, IUser loser2)
         {
-            return ReportGameAsync(
+            await ReportGameAsync(
                 new List<IUser> {winner1, winner2},
-                new List<IUser> {loser1, loser2},
-                comments);
+                new List<IUser> {loser1, loser2});
         }
 
         [Command("report")]
         [Summary("Reports a ladder game")]
-        public Task ReportGameAsync(
+        public async Task ReportGameAsync(
             IUser winner1, IUser winner2, IUser winner3,
             string delimeter, 
-            IUser loser1, IUser loser2, IUser loser3,
-            [Remainder] string comments = "")
+            IUser loser1, IUser loser2, IUser loser3)
         {
-            return ReportGameAsync(
+            await ReportGameAsync(
                 new List<IUser> {winner1, winner2, winner3},
-                new List<IUser> {loser1, loser2, loser3},
-                comments);
+                new List<IUser> {loser1, loser2, loser3});
         }
         
         [Command("report")]
         [Summary("Reports a ladder game")]
-        public Task ReportGameAsync(
+        public async Task ReportGameAsync(
             IUser winner1, IUser winner2, IUser winner3, IUser winner4,
             string delimeter, 
-            IUser loser1, IUser loser2, IUser loser3, IUser loser4,
-            [Remainder] string comments = "")
+            IUser loser1, IUser loser2, IUser loser3, IUser loser4)
         {
-            return ReportGameAsync(
+            await ReportGameAsync(
                 new List<IUser> {winner1, winner2, winner3, winner4},
-                new List<IUser> {loser1, loser2, loser3, loser4},
-                comments);
+                new List<IUser> {loser1, loser2, loser3, loser4});
         }
     }
 }

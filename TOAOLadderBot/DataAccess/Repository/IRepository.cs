@@ -11,9 +11,11 @@ namespace TOAOLadderBot.DataAccess.Repository
 
         TEntity Create(TEntity entity);
 
-        bool Update(TEntity entity);
+        TEntity Update(TEntity entity);
 
-        bool Delete(TEntity entity);
+        TEntity Upsert(TEntity entity);
+
+        TEntity Delete(TEntity entity);
         
     }
 }

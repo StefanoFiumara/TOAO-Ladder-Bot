@@ -57,6 +57,7 @@ namespace TOAOLadderBot.Tests
 
             // Assert
             Assert.Throws<LiteException>(() => _unitOfWork.Save());
+            Assert.Empty(repo.Query.ToList());
         }
 
         [Fact]

@@ -9,18 +9,16 @@ namespace TOAOLadderBot.DataAccess.Models
     {
         public ObjectId Id { get; init; }
         
-        private DateTimeOffset ReportedDate { get; set; }
+        public DateTimeOffset ReportedDate { get; set; }
         
-        [BsonRef(nameof(Player))]
-        private List<Player> Winners { get; set; }
-        
-        [BsonRef(nameof(Player))]
-        private List<Player> Losers { get; set; }
+        // TODO: Do we need more info than just winners/losers? LiteDB does not allow circular references so this might get messy.
+        public List<string> Winners { get; set; }
+        public List<string> Losers { get; set; }
         
         public override string ToString()
         {
-            var winners = string.Join(", ", Winners.Select(p => p.Name));
-            var losers = string.Join(", ", Losers.Select(p => p.Name));
+            var winners = string.Join(", ", Winners);
+            var losers = string.Join(", ", Losers);
 
             var s = Winners.Count == 1 ? "s" : string.Empty;
             return $"{ReportedDate:g} -- {winners} defeat{s} {losers}";
