@@ -102,16 +102,81 @@ namespace TOAOLadderBot.Services
             
         }
 
-        private string GetRank(double score)
+        private Rank GetRank(double score)
         {
-            // TODO: Rank lookup by score
-            throw new System.NotImplementedException();
+            return score switch
+            {
+                >= 20 and <= 30 => Rank.Newbie,
+                >= 31 and <= 60 => Rank.Rook,
+                >= 61 and <= 80 => Rank.Grook,
+                >= 81 and <= 105 => Rank.Inter,
+                >= 106 and <= 154 => Rank.Upper,
+                >= 155 => Rank.Expert,
+                _ => throw new Exception("Score out of range!") // TODO: Custom exceptions?
+            };
         }
-
-        private int CalculatePoints(string winnerRank, string loserRank)
+        
+        private int CalculatePoints(Rank winner, Rank loser)
         {
             // TODO: point calculation by rank
-            throw new System.NotImplementedException();
+            var scoringTable = new Dictionary<Rank, Dictionary<Rank, int>>
+            {
+                { Rank.Expert, new Dictionary<Rank, int>() },
+                { Rank.Upper, new Dictionary<Rank, int>() },
+                { Rank.Inter, new Dictionary<Rank, int>() },
+                { Rank.Grook, new Dictionary<Rank, int>() },
+                { Rank.Rook, new Dictionary<Rank, int>() },
+                { Rank.Newbie, new Dictionary<Rank, int>() }
+            };
+            
+            // TODO: this will fail unless we add all the keys to the inner dictionaries
+            // TODO: Better way of storing scoring table? How about in the DB? Configuration?
+            scoringTable[Rank.Expert].Add(Rank.Expert, 6); // etc...
+
+            
+            scoringTable[Rank.Expert][Rank.Expert] = 6;
+            scoringTable[Rank.Expert][Rank.Upper] = 3;
+            scoringTable[Rank.Expert][Rank.Inter] = 3;
+            scoringTable[Rank.Expert][Rank.Grook] = 1;
+            scoringTable[Rank.Expert][Rank.Rook] = 1;
+            scoringTable[Rank.Expert][Rank.Newbie] = 1;
+
+            scoringTable[Rank.Upper][Rank.Expert] = 9;
+            scoringTable[Rank.Upper][Rank.Upper] = 6;
+            scoringTable[Rank.Upper][Rank.Inter] = 3;
+            scoringTable[Rank.Upper][Rank.Grook] = 3;
+            scoringTable[Rank.Upper][Rank.Rook] = 1;
+            scoringTable[Rank.Upper][Rank.Newbie] = 1;
+            
+            scoringTable[Rank.Inter][Rank.Expert] = 12;
+            scoringTable[Rank.Inter][Rank.Upper] = 9;
+            scoringTable[Rank.Inter][Rank.Inter] = 6;
+            scoringTable[Rank.Inter][Rank.Grook] = 3;
+            scoringTable[Rank.Inter][Rank.Rook] = 3;
+            scoringTable[Rank.Inter][Rank.Newbie] = 1;
+            
+            scoringTable[Rank.Grook][Rank.Expert] = 15;
+            scoringTable[Rank.Grook][Rank.Upper] = 12;
+            scoringTable[Rank.Grook][Rank.Inter] = 9;
+            scoringTable[Rank.Grook][Rank.Grook] = 6;
+            scoringTable[Rank.Grook][Rank.Rook] = 3;
+            scoringTable[Rank.Grook][Rank.Newbie] = 3;
+            
+            scoringTable[Rank.Rook][Rank.Expert] = 18;
+            scoringTable[Rank.Rook][Rank.Upper] = 15;
+            scoringTable[Rank.Rook][Rank.Inter] = 12;
+            scoringTable[Rank.Rook][Rank.Grook] = 9;
+            scoringTable[Rank.Rook][Rank.Rook] = 6;
+            scoringTable[Rank.Rook][Rank.Newbie] = 3;
+            
+            scoringTable[Rank.Newbie][Rank.Expert] = 21;
+            scoringTable[Rank.Newbie][Rank.Upper] = 18;
+            scoringTable[Rank.Newbie][Rank.Inter] = 15;
+            scoringTable[Rank.Newbie][Rank.Grook] = 12;
+            scoringTable[Rank.Newbie][Rank.Rook] = 9;
+            scoringTable[Rank.Newbie][Rank.Newbie] = 6;
+            
+            return scoringTable[winner][loser];
         }
 
         private List<Player> FindOrCreateLadderPlayers(List<IUser> users)
