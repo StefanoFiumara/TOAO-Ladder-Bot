@@ -20,8 +20,6 @@ namespace TOAOLadderBot.DataAccess
 
         private void EnsureIndexes()
         {
-            // TODO: Cleaner way of setting this up?
-            _database.GetCollection<Player>().EnsureIndex(p => p.Name); 
             _database.GetCollection<Player>().EnsureIndex(p => p.DiscordId);
         }
 

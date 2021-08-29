@@ -7,7 +7,7 @@ namespace TOAOLadderBot.DataAccess
 {
     public class LiteDbContext
     {
-        public LiteDatabase Database { get; }
+        private LiteDatabase Database { get; }
         private readonly List<Action> _commands;
 
         public LiteDbContext(LiteDatabase database)

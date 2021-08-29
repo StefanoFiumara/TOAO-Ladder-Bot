@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -16,6 +15,8 @@ namespace TOAOLadderBot.Commands.CommandModules
 
         private async Task ReportGameAsync(List<IUser> winners, List<IUser> losers)
         {
+            // TODO: Should we check for delimiter == "defeat" or "defeats" ?
+            // TODO: Only respond to reports in the ladder reports channel
             if (winners.Concat(losers).Any(u => u == Context.User))
             {
                 // TODO: defer to LadderReportingService for actual logic

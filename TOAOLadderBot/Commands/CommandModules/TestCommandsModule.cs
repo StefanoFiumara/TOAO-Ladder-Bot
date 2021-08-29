@@ -8,7 +8,6 @@ namespace TOAOLadderBot.Commands.CommandModules
 {
     public class TestCommandsModule : ModuleBase<SocketCommandContext>
     {
-        // ~ping hello world -> hello world
         [Command("ping")]
         [Summary("Test connection")]
         public Task PingAsync()

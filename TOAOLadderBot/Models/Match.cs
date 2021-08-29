@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LiteDB;
+using TOAOLadderBot.DataAccess;
 
 namespace TOAOLadderBot.Models
 {
@@ -9,13 +10,13 @@ namespace TOAOLadderBot.Models
     {
         public ObjectId Id { get; init; }
         
-        public DateTimeOffset ReportedDate { get; set; }
+        public DateTimeOffset ReportedDate { get; init; }
         
         [BsonRef(nameof(Player))]
-        public List<Player> Winners { get; set; }
+        public List<Player> Winners { get; init; }
         
         [BsonRef(nameof(Player))]
-        public List<Player> Losers { get; set; }
+        public List<Player> Losers { get; init; }
         
         public override string ToString()
         {

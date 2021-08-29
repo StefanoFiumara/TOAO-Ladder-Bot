@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LiteDB;
+using TOAOLadderBot.DataAccess;
 using TOAOLadderBot.Services;
 
 namespace TOAOLadderBot.Models
