@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using TOAOLadderBot.DataAccess.Models;
+using TOAOLadderBot.Models;
 using TOAOLadderBot.Services;
 using Xunit;
 
@@ -24,7 +24,7 @@ namespace TOAOLadderBot.Tests
         public async Task GameReport_WithNewPlayers_CreatesNewPlayers()
         {
             // Arrange
-            var users = TestData.GenerateRandomDiscordUsers(2);
+            var users = TestData.GenerateUniqueDiscordUsers(2);
 
             // Act
             await _service.ReportGameAsync(users.Take(1).ToList(), users.TakeLast(1).ToList());
@@ -38,7 +38,7 @@ namespace TOAOLadderBot.Tests
         public async Task GameReport_WithExistingPlayers_DoesNotCreateNewPlayers()
         {
             // Arrange
-            var (users, players) = TestData.GenerateRegisteredPlayers(2);
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
             
             var repository = UnitOfWork.GetRepository<Player>();
 
@@ -51,6 +51,25 @@ namespace TOAOLadderBot.Tests
             // Assert
             var result = repository.Query.OrderBy(p => p.Name).ToList();
             Assert.Equal(2, result.Count);
+        }
+
+        [Fact]
+        public async Task GameReport_CreatesMatchData_CorrectlyAssignsWinnersAndLosers()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+            
+            // Act
+            var match = await _service.ReportGameAsync(users.Take(1).ToList(), users.TakeLast(1).ToList());
+            
+            // Assert
+            Assert.Equal(players.First().Id, match.Winners.Single().Id);
+            Assert.Equal(players.Last().Id, match.Losers.Single().Id);
         }
     }
 }

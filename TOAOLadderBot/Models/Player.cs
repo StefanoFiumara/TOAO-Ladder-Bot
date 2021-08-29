@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using LiteDB;
 using TOAOLadderBot.Services;
 
-namespace TOAOLadderBot.DataAccess.Models
+namespace TOAOLadderBot.Models
 {
     public class Player : ILiteDbDocument, IEquatable<Player>
     {

@@ -1,6 +1,6 @@
 using LiteDB;
 
-namespace TOAOLadderBot.DataAccess.Models
+namespace TOAOLadderBot.Models
 {
     public interface ILiteDbDocument
     {

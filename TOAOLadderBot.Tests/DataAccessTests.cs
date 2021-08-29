@@ -1,7 +1,7 @@
 using System;
 using LiteDB;
-using TOAOLadderBot.DataAccess.Models;
 using TOAOLadderBot.DataAccess.Repository;
+using TOAOLadderBot.Models;
 using Xunit;
 
 namespace TOAOLadderBot.Tests
@@ -99,89 +99,6 @@ namespace TOAOLadderBot.Tests
             
             // Assert
             Assert.Empty(repo.Query.ToList());
-        }
-
-        [Fact]
-        public void FindByName_FiltersCorrectly()
-        {
-            // Arrange
-            var repo = UnitOfWork.GetRepository<Player>();
-            var fano = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | Fano",
-                Score = 75
-            };
-
-            var nemo = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | Nemo",
-                Score = 75
-            };
-            
-            var bryan = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | 1nsane",
-                Score = 75
-            };
-            
-            repo.Create(fano);
-            repo.Create(nemo);
-            repo.Create(bryan);
-            UnitOfWork.Save();
-            
-            // Act
-            var search1 = repo.FindByName("Fano");
-            var search2 = repo.FindByName("Nemo");
-            var search3 = repo.FindByName("1nsane");
-            
-            Assert.NotNull(search1);
-            Assert.NotNull(search2);
-            Assert.NotNull(search3);
-            
-            Assert.Equal(fano.Id, search1.Id);
-            Assert.Equal(nemo.Id, search2.Id);
-            Assert.Equal(bryan.Id, search3.Id);
-        }
-
-        [Fact]
-        public void FindByName_ForNoMatch_ReturnsNull()
-        {
-            // Arrange
-            var repo = UnitOfWork.GetRepository<Player>();
-            var fano = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | Fano",
-                Score = 85
-            };
-
-            var nemo = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | Nemo",
-                Score = 75
-            };
-            
-            var bryan = new Player
-            {
-                Id = ObjectId.NewObjectId(),
-                Name = "TOAO | 1nsane",
-                Score = 65
-            };
-            
-            repo.Create(fano);
-            repo.Create(nemo);
-            repo.Create(bryan);
-            UnitOfWork.Save();
-            
-            // Act
-            var search = repo.FindByName("Cheesus");
-            
-            // Assert
-            Assert.Null(search);
         }
 
         [Fact]

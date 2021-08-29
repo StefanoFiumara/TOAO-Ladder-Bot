@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Discord;
 using LiteDB;
 using TOAOLadderBot.DataAccess;
-using TOAOLadderBot.DataAccess.Models;
 using TOAOLadderBot.DataAccess.Repository;
+using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.Services
 {

@@ -1,7 +1,7 @@
 using System;
 using LiteDB;
-using TOAOLadderBot.DataAccess.Models;
 using TOAOLadderBot.DataAccess.Repository;
+using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.DataAccess
 {

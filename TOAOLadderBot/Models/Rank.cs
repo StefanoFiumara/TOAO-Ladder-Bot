@@ -1,4 +1,4 @@
-namespace TOAOLadderBot.DataAccess.Models
+namespace TOAOLadderBot.Models
 {
     // TODO: Modernized rank names
     public enum Rank

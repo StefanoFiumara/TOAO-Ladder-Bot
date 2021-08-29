@@ -1,5 +1,5 @@
 using System;
-using TOAOLadderBot.DataAccess.Models;
+using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.Services
 {
