@@ -6,6 +6,7 @@ using Discord;
 using LiteDB;
 using TOAOLadderBot.DataAccess;
 using TOAOLadderBot.DataAccess.Repository;
+using TOAOLadderBot.Exceptions;
 using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.Services
@@ -26,13 +27,12 @@ namespace TOAOLadderBot.Services
         public async Task<Match> ReportGameAsync(List<IUser> winners, List<IUser> losers)
         {
             var allPlayers = winners.Concat(losers).ToList();
-
-            // TODO: Are exceptions the right way to handle these errors? Should we have custom exceptions?
+            
             if (allPlayers.Distinct().Count() != allPlayers.Count)
-                throw new Exception("Found duplicate players in match report, this is not allowed!");
+                throw new GameReportException("Found duplicate players in match report, this is not allowed!");
 
             if (winners.Count != losers.Count)
-                throw new Exception("Teams are uneven, this is not allowed!");
+                throw new GameReportException("Teams are uneven, this is not allowed!");
             
 
             return await Task.Run(() =>
@@ -89,8 +89,7 @@ namespace TOAOLadderBot.Services
                 player.MatchHistory.Add(match);
                 _playerRepository.Upsert(player);
             }
-
-            // TODO: Test that this logic creates all data correctly.
+            
             _unitOfWork.Save();
             return match;
             

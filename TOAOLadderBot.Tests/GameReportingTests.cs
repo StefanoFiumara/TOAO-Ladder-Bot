@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using TOAOLadderBot.Exceptions;
 using TOAOLadderBot.Models;
 using TOAOLadderBot.Services;
 using Xunit;
@@ -70,6 +72,37 @@ namespace TOAOLadderBot.Tests
             // Assert
             Assert.Equal(players.First().Id, match.Winners.Single().Id);
             Assert.Equal(players.Last().Id, match.Losers.Single().Id);
+        }
+
+        [Fact]
+        public async Task GameReport_WithUnevenTeams_Throws()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(3);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act / Assert
+            await Assert.ThrowsAsync<GameReportException>(() => _service.ReportGameAsync(users.Take(2).ToList(), users.TakeLast(1).ToList()));
+            await Assert.ThrowsAsync<GameReportException>(() => _service.ReportGameAsync(users.Take(1).ToList(), users.TakeLast(2).ToList()));
+        }
+        
+        [Fact]
+        public async Task GameReport_WithDuplicatePlayer_Throws()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act / Assert
+            await Assert.ThrowsAsync<GameReportException>(() => _service.ReportGameAsync(users.Take(1).ToList(), users.Take(1).ToList()));
         }
     }
 }

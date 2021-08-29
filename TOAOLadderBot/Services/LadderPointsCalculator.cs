@@ -1,4 +1,5 @@
 using System;
+using TOAOLadderBot.Exceptions;
 using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.Services
@@ -25,7 +26,7 @@ namespace TOAOLadderBot.Services
                 >= 81 and <= 105 => Rank.Inter,
                 >= 106 and <= 154 => Rank.Upper,
                 >= 155 => Rank.Expert,
-                _ => throw new Exception("Score out of range!") // TODO: Custom exceptions?
+                _ => throw new PointsCalculatorException("Score out of range!")
             };
         }
         
