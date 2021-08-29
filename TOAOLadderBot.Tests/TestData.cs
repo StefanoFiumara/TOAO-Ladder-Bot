@@ -36,6 +36,7 @@ namespace TOAOLadderBot.Tests
             var players = fixture.Build<Player>()
                 .With(p => p.DiscordId, () => userIds.Dequeue())
                 .With(p => p.Score, 75)
+                .With(p => p.MatchHistory, new List<Match>())
                 .CreateMany(users.Count)
                 .ToList();
 
