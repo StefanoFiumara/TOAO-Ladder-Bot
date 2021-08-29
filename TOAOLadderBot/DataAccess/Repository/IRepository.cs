@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using LiteDB;
 using TOAOLadderBot.DataAccess.Models;
@@ -10,6 +11,8 @@ namespace TOAOLadderBot.DataAccess.Repository
         ILiteQueryable<TEntity> Query { get; }
 
         TEntity Create(TEntity entity);
+        
+        int CreateMany(IEnumerable<TEntity> entities);
 
         TEntity Update(TEntity entity);
 

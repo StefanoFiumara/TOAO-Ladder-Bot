@@ -1,27 +1,18 @@
 using System;
 using LiteDB;
-using TOAOLadderBot.DataAccess;
 using TOAOLadderBot.DataAccess.Models;
 using TOAOLadderBot.DataAccess.Repository;
 using Xunit;
 
 namespace TOAOLadderBot.Tests
 {
-    public class DataAccessTests : IDisposable
+    public class DataAccessTests : LadderBotTestsBase, IDisposable
     {
-        private readonly UnitOfWork _unitOfWork;
-        public DataAccessTests()
-        {
-            var db = new LiteDatabase(":memory:");
-            var context = new LiteDbContext(db);
-            _unitOfWork = new UnitOfWork(db, context);
-        }
-
         [Fact]
         public void Create_AssignsObjectId()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var player = new Player
             {
                 Id = ObjectId.Empty,
@@ -31,7 +22,7 @@ namespace TOAOLadderBot.Tests
 
             // Act
             repo.Create(player);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
 
             // Assert
             var allPlayers = repo.Query.ToList();
@@ -43,7 +34,7 @@ namespace TOAOLadderBot.Tests
         public void Create_WithDuplicateObjectId_Fails()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var player = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -56,7 +47,7 @@ namespace TOAOLadderBot.Tests
             repo.Create(player);
 
             // Assert
-            Assert.Throws<LiteException>(() => _unitOfWork.Save());
+            Assert.Throws<LiteException>(() => UnitOfWork.Save());
             Assert.Empty(repo.Query.ToList());
         }
 
@@ -64,7 +55,7 @@ namespace TOAOLadderBot.Tests
         public void Update_ReplacesObjects()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var player = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -73,13 +64,13 @@ namespace TOAOLadderBot.Tests
             };
 
             repo.Create(player);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
 
             // Act
             player.Score = 80;
             repo.Update(player);
 
-            _unitOfWork.Save();
+            UnitOfWork.Save();
 
             // Assert
             var saved = Assert.Single(repo.Query.ToList());
@@ -91,7 +82,7 @@ namespace TOAOLadderBot.Tests
         public void Delete_RemovesObject()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var player = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -100,11 +91,11 @@ namespace TOAOLadderBot.Tests
             };
 
             repo.Create(player);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
 
             // Act
             repo.Delete(player);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
             
             // Assert
             Assert.Empty(repo.Query.ToList());
@@ -114,7 +105,7 @@ namespace TOAOLadderBot.Tests
         public void FindByName_FiltersCorrectly()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var fano = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -139,7 +130,7 @@ namespace TOAOLadderBot.Tests
             repo.Create(fano);
             repo.Create(nemo);
             repo.Create(bryan);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
             
             // Act
             var search1 = repo.FindByName("Fano");
@@ -159,7 +150,7 @@ namespace TOAOLadderBot.Tests
         public void FindByName_ForNoMatch_ReturnsNull()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var fano = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -184,7 +175,7 @@ namespace TOAOLadderBot.Tests
             repo.Create(fano);
             repo.Create(nemo);
             repo.Create(bryan);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
             
             // Act
             var search = repo.FindByName("Cheesus");
@@ -197,7 +188,7 @@ namespace TOAOLadderBot.Tests
         public void Query_ReturnsFilteredData()
         {
             // Arrange
-            var repo = _unitOfWork.GetRepository<Player>();
+            var repo = UnitOfWork.GetRepository<Player>();
             var fano = new Player
             {
                 Id = ObjectId.NewObjectId(),
@@ -222,7 +213,7 @@ namespace TOAOLadderBot.Tests
             repo.Create(fano);
             repo.Create(nemo);
             repo.Create(bryan);
-            _unitOfWork.Save();
+            UnitOfWork.Save();
             
             // Act
             var searchResult = repo.Query.Where(p => p.Score > 70).ToList();
@@ -233,11 +224,6 @@ namespace TOAOLadderBot.Tests
             
             Assert.Contains(fano, searchResult);
             Assert.Contains(nemo, searchResult);
-        }
-        
-        public void Dispose()
-        {
-            _unitOfWork?.Dispose();
         }
     }
 }

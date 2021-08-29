@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using LiteDB;
 using TOAOLadderBot.DataAccess.Models;
@@ -27,6 +28,16 @@ namespace TOAOLadderBot.DataAccess.Repository
             });
             
             return entity;
+        }
+
+        public int CreateMany(IEnumerable<TEntity> entities)
+        {
+            _context.AddCommand(() =>
+            {
+                _database.GetCollection<TEntity>().InsertBulk(entities);
+            });
+            
+            return entities.Count();
         }
 
         public TEntity Update(TEntity entity)

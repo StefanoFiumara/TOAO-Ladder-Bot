@@ -15,12 +15,24 @@ namespace TOAOLadderBot.Services
         private readonly UnitOfWork _unitOfWork;
         private readonly IRepository<Player> _playerRepository;
         private readonly IRepository<Match> _matchRepository;
+        private readonly int[,] _scoringTable;
 
         public GameReportingService(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _playerRepository = _unitOfWork.GetRepository<Player>();
             _matchRepository = _unitOfWork.GetRepository<Match>();
+            
+            // TODO: Better way of storing scoring table? How about in the DB? Configuration?
+            _scoringTable = new[,]
+            {
+                { 6,  3,   3,  1, 1, 1 },
+                { 9,  6,   3,  3, 1, 1 },
+                { 12, 9,   6,  3, 3, 1 },
+                { 15, 12,  9,  6, 3, 3 },
+                { 18, 15, 12,  9, 6, 3 },
+                { 21, 18, 15, 12, 9, 6 }
+            };
         }
 
         public async Task<Match> ReportGameAsync(List<IUser> winners, List<IUser> losers)
@@ -118,76 +130,20 @@ namespace TOAOLadderBot.Services
         
         private int CalculatePoints(Rank winner, Rank loser)
         {
-            // TODO: point calculation by rank
-            var scoringTable = new Dictionary<Rank, Dictionary<Rank, int>>
-            {
-                { Rank.Expert, new Dictionary<Rank, int>() },
-                { Rank.Upper, new Dictionary<Rank, int>() },
-                { Rank.Inter, new Dictionary<Rank, int>() },
-                { Rank.Grook, new Dictionary<Rank, int>() },
-                { Rank.Rook, new Dictionary<Rank, int>() },
-                { Rank.Newbie, new Dictionary<Rank, int>() }
-            };
-            
-            // TODO: this will fail unless we add all the keys to the inner dictionaries
-            // TODO: Better way of storing scoring table? How about in the DB? Configuration?
-            scoringTable[Rank.Expert].Add(Rank.Expert, 6); // etc...
-
-            
-            scoringTable[Rank.Expert][Rank.Expert] = 6;
-            scoringTable[Rank.Expert][Rank.Upper] = 3;
-            scoringTable[Rank.Expert][Rank.Inter] = 3;
-            scoringTable[Rank.Expert][Rank.Grook] = 1;
-            scoringTable[Rank.Expert][Rank.Rook] = 1;
-            scoringTable[Rank.Expert][Rank.Newbie] = 1;
-
-            scoringTable[Rank.Upper][Rank.Expert] = 9;
-            scoringTable[Rank.Upper][Rank.Upper] = 6;
-            scoringTable[Rank.Upper][Rank.Inter] = 3;
-            scoringTable[Rank.Upper][Rank.Grook] = 3;
-            scoringTable[Rank.Upper][Rank.Rook] = 1;
-            scoringTable[Rank.Upper][Rank.Newbie] = 1;
-            
-            scoringTable[Rank.Inter][Rank.Expert] = 12;
-            scoringTable[Rank.Inter][Rank.Upper] = 9;
-            scoringTable[Rank.Inter][Rank.Inter] = 6;
-            scoringTable[Rank.Inter][Rank.Grook] = 3;
-            scoringTable[Rank.Inter][Rank.Rook] = 3;
-            scoringTable[Rank.Inter][Rank.Newbie] = 1;
-            
-            scoringTable[Rank.Grook][Rank.Expert] = 15;
-            scoringTable[Rank.Grook][Rank.Upper] = 12;
-            scoringTable[Rank.Grook][Rank.Inter] = 9;
-            scoringTable[Rank.Grook][Rank.Grook] = 6;
-            scoringTable[Rank.Grook][Rank.Rook] = 3;
-            scoringTable[Rank.Grook][Rank.Newbie] = 3;
-            
-            scoringTable[Rank.Rook][Rank.Expert] = 18;
-            scoringTable[Rank.Rook][Rank.Upper] = 15;
-            scoringTable[Rank.Rook][Rank.Inter] = 12;
-            scoringTable[Rank.Rook][Rank.Grook] = 9;
-            scoringTable[Rank.Rook][Rank.Rook] = 6;
-            scoringTable[Rank.Rook][Rank.Newbie] = 3;
-            
-            scoringTable[Rank.Newbie][Rank.Expert] = 21;
-            scoringTable[Rank.Newbie][Rank.Upper] = 18;
-            scoringTable[Rank.Newbie][Rank.Inter] = 15;
-            scoringTable[Rank.Newbie][Rank.Grook] = 12;
-            scoringTable[Rank.Newbie][Rank.Rook] = 9;
-            scoringTable[Rank.Newbie][Rank.Newbie] = 6;
-            
-            return scoringTable[winner][loser];
+            return _scoringTable[(int) winner, (int) loser];
         }
 
         private List<Player> FindOrCreateLadderPlayers(List<IUser> users)
         {
             var players = new List<Player>();
 
-            // TODO: Test that this method doesn't create any new players when all players are already signed up for the ladder
-            var existingPlayers = _playerRepository.Query.Where(p => users.Any(u => u.Id == p.DiscordId)).ToList();
-            var missingUsers = users.Where(u => existingPlayers.All(p => p.DiscordId != u.Id)).ToList();
+            // NOTE: Map to list of Ids since otherwise the LiteDB provider will try to serialize the entire IUser object
+            var playerIds = users.Select(u => u.Id).ToList();
+            var existingPlayers = _playerRepository.Query.Where(p => playerIds.Any(id => id == p.DiscordId)).ToList();
             
-            foreach (var user in missingUsers)
+            var newPlayers = users.Where(u => existingPlayers.All(p => p.DiscordId != u.Id)).ToList();
+            
+            foreach (var user in newPlayers)
             {
                 var player = new Player
                 {
@@ -203,6 +159,8 @@ namespace TOAOLadderBot.Services
 
                 players.Add(player);
             }
+            
+            players.AddRange(existingPlayers);
             
             return players;
         }
