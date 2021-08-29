@@ -27,34 +27,33 @@ namespace TOAOLadderBot.Services
         public async Task<Match> ReportGameAsync(List<IUser> winners, List<IUser> losers)
         {
             var allPlayers = winners.Concat(losers).ToList();
-            
+
+            if (winners.Count == 0 || losers.Count == 0)
+                throw new GameReportException("One of the teams contained no players!");
+
             if (allPlayers.Distinct().Count() != allPlayers.Count)
                 throw new GameReportException("Found duplicate players in match report, this is not allowed!");
 
             if (winners.Count != losers.Count)
                 throw new GameReportException("Teams are uneven, this is not allowed!");
-            
 
             return await Task.Run(() =>
             {
-                var winnerTeam = FindOrCreateLadderPlayers(winners);
-                var loserTeam = FindOrCreateLadderPlayers(losers);
-
+                var (winnerTeam, loserTeam) = FindOrCreateLadderPlayers(winners, losers);
                 return ReportGame(winnerTeam, loserTeam);
             });
         }
 
         private Match ReportGame(List<Player> winners, List<Player> losers)
         {
-            var allPlayers = winners.Concat(losers).ToList();
-            
             var winnerScoreAvg = winners.Select(p => p.Score).Average();
             var loserScoreAvg  = losers.Select(p => p.Score).Average();
             
             var winnerRank = LadderPointsCalculator.CalculateRank(winnerScoreAvg);
             var loserRank = LadderPointsCalculator.CalculateRank(loserScoreAvg);
 
-            var points = LadderPointsCalculator.CalculatePoints(winnerRank, loserRank, allPlayers.Count);
+            var playerCount = winners.Concat(losers).Count();
+            var points = LadderPointsCalculator.CalculatePoints(winnerRank, loserRank, playerCount);
 
             foreach (var winner in winners)
             {
@@ -92,12 +91,12 @@ namespace TOAOLadderBot.Services
             
             _unitOfWork.Save();
             return match;
-            
         }
 
-        private List<Player> FindOrCreateLadderPlayers(List<IUser> users)
+        private (List<Player> winnerTeam, List<Player> loserTeam) FindOrCreateLadderPlayers(List<IUser> winners, List<IUser> losers)
         {
             var players = new List<Player>();
+            var users = winners.Concat(losers).ToList();
 
             // NOTE: Map to list of Ids since otherwise the LiteDB provider will try to serialize the entire IUser object when we query
             var playerIds = users.Select(u => u.Id).ToList();
@@ -123,8 +122,10 @@ namespace TOAOLadderBot.Services
             }
             
             players.AddRange(existingPlayers);
-            
-            return players;
+
+            var winnerTeam = players.Where(p => winners.Any(w => w.Id == p.DiscordId)).ToList();
+            var loserTeam = players.Where(p => losers.Any(l => l.Id == p.DiscordId)).ToList();
+            return (winnerTeam, loserTeam);
         }
     }
 }

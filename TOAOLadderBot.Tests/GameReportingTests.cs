@@ -56,7 +56,7 @@ namespace TOAOLadderBot.Tests
         }
 
         [Fact]
-        public async Task GameReport_CreatesMatchData_CorrectlyAssignsWinnersAndLosers()
+        public async Task GameReport_CreatesMatchData_1vs1_CorrectlyAssignsWinnersAndLosers()
         {
             // Arrange
             var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
@@ -73,7 +73,53 @@ namespace TOAOLadderBot.Tests
             Assert.Equal(players.First().Id, match.Winners.Single().Id);
             Assert.Equal(players.Last().Id, match.Losers.Single().Id);
         }
+        
+        [Theory]
+        [InlineData(4)]
+        [InlineData(6)]
+        [InlineData(8)]
+        public async Task GameReport_CreatesMatchData_TeamGame_CorrectlyAssignsWinnersAndLosers(int numPlayers)
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(numPlayers);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
 
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+            
+            // Act
+            var winnerUsers = users.Take(numPlayers / 2).ToList();
+            var loserUsers = users.TakeLast(numPlayers / 2).ToList();
+            var match = await _service.ReportGameAsync(winnerUsers, loserUsers);
+            
+            // Assert
+            Assert.All(match.Winners, winner =>
+            {
+                Assert.Contains(winnerUsers, u => u.Id == winner.DiscordId);
+            });
+            
+            Assert.All(match.Losers, loser =>
+            {
+                Assert.Contains(loserUsers, u => u.Id == loser.DiscordId);
+            });
+        }
+
+        [Fact]
+        public async Task GameReport_WithEmptyTeam_Throws()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(3);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act / Assert
+            await Assert.ThrowsAsync<GameReportException>(() => _service.ReportGameAsync(users.Take(0).ToList(), users.TakeLast(0).ToList()));
+        }
+        
         [Fact]
         public async Task GameReport_WithUnevenTeams_Throws()
         {
