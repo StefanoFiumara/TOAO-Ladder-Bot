@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LiteDB;
+using TOAOLadderBot.Services;
 
 namespace TOAOLadderBot.DataAccess.Models
 {
@@ -20,9 +21,10 @@ namespace TOAOLadderBot.DataAccess.Models
         public List<Match> MatchHistory { get; set; }
         
         public int GamesPlayed => Wins + Losses;
-        
-        // TODO: Rank/Tier calculated from score? or based on percentile?
-        // TODO: Win Percent
+
+        public Rank Rank => LadderPointsCalculator.CalculateRank(Score);
+        public float WinPercent => GamesPlayed > 0 ? (float) Wins / GamesPlayed : 0.0f;
+
         public bool Equals(Player other)
         {
             if (ReferenceEquals(null, other)) return false;

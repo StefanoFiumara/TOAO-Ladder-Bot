@@ -15,24 +15,12 @@ namespace TOAOLadderBot.Services
         private readonly UnitOfWork _unitOfWork;
         private readonly IRepository<Player> _playerRepository;
         private readonly IRepository<Match> _matchRepository;
-        private readonly int[,] _scoringTable;
 
         public GameReportingService(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _playerRepository = _unitOfWork.GetRepository<Player>();
-            _matchRepository = _unitOfWork.GetRepository<Match>();
-            
-            // TODO: Better way of storing scoring table? How about in the DB? Configuration?
-            _scoringTable = new[,]
-            {
-                { 6,  3,   3,  1, 1, 1 },
-                { 9,  6,   3,  3, 1, 1 },
-                { 12, 9,   6,  3, 3, 1 },
-                { 15, 12,  9,  6, 3, 3 },
-                { 18, 15, 12,  9, 6, 3 },
-                { 21, 18, 15, 12, 9, 6 }
-            };
+            _matchRepository = _unitOfWork.GetRepository<Match>();   
         }
 
         public async Task<Match> ReportGameAsync(List<IUser> winners, List<IUser> losers)
@@ -63,17 +51,11 @@ namespace TOAOLadderBot.Services
             var winnerScoreAvg = winners.Select(p => p.Score).Average();
             var loserScoreAvg  = losers.Select(p => p.Score).Average();
             
-            var winnerRank = GetRank(winnerScoreAvg);
-            var loserRank = GetRank(loserScoreAvg);
+            var winnerRank = LadderPointsCalculator.CalculateRank(winnerScoreAvg);
+            var loserRank = LadderPointsCalculator.CalculateRank(loserScoreAvg);
 
-            var points = CalculatePoints(winnerRank, loserRank);
+            var points = LadderPointsCalculator.CalculatePoints(winnerRank, loserRank, allPlayers.Count);
 
-            if (winners.Count > 1)
-                points = (int)(points * (1 - 0.05 * allPlayers.Count));
-            
-            if (points < 1) 
-                points = 1;
-            
             foreach (var winner in winners)
             {
                 winner.Score += points;
@@ -95,8 +77,8 @@ namespace TOAOLadderBot.Services
             var match = new Match
             {
                 Id = ObjectId.NewObjectId(),
-                Winners = winners.Select(p => p.Name).ToList(),
-                Losers = losers.Select(p => p.Name).ToList(),
+                Winners = winners.ToList(),
+                Losers = losers.ToList(),
                 ReportedDate = DateTimeOffset.UtcNow
             };
 
@@ -114,30 +96,11 @@ namespace TOAOLadderBot.Services
             
         }
 
-        private Rank GetRank(double score)
-        {
-            return score switch
-            {
-                >= 20 and <= 30 => Rank.Newbie,
-                >= 31 and <= 60 => Rank.Rook,
-                >= 61 and <= 80 => Rank.Grook,
-                >= 81 and <= 105 => Rank.Inter,
-                >= 106 and <= 154 => Rank.Upper,
-                >= 155 => Rank.Expert,
-                _ => throw new Exception("Score out of range!") // TODO: Custom exceptions?
-            };
-        }
-        
-        private int CalculatePoints(Rank winner, Rank loser)
-        {
-            return _scoringTable[(int) winner, (int) loser];
-        }
-
         private List<Player> FindOrCreateLadderPlayers(List<IUser> users)
         {
             var players = new List<Player>();
 
-            // NOTE: Map to list of Ids since otherwise the LiteDB provider will try to serialize the entire IUser object
+            // NOTE: Map to list of Ids since otherwise the LiteDB provider will try to serialize the entire IUser object when we query
             var playerIds = users.Select(u => u.Id).ToList();
             var existingPlayers = _playerRepository.Query.Where(p => playerIds.Any(id => id == p.DiscordId)).ToList();
             
