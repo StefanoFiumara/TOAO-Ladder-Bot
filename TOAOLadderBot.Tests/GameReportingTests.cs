@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoFixture;
-using AutoFixture.AutoMoq;
 using TOAOLadderBot.Exceptions;
 using TOAOLadderBot.Models;
 using TOAOLadderBot.Services;
@@ -14,12 +10,10 @@ namespace TOAOLadderBot.Tests
     public class GameReportingTests : LadderBotTestsBase
     {
         private readonly GameReportingService _service;
-        private readonly IFixture _fixture;
 
         public GameReportingTests()
         {
             _service = new GameReportingService(UnitOfWork);
-            _fixture = new Fixture().Customize(new AutoMoqCustomization() { ConfigureMembers = true });
         }
 
         [Fact]
@@ -48,37 +42,21 @@ namespace TOAOLadderBot.Tests
             UnitOfWork.Save();
 
             // Act
-            await _service.ReportGameAsync(users.Take(1).ToList(), users.TakeLast(1).ToList());
+            var winnerUser = users.Take(1).ToList();
+            var loserUser = users.TakeLast(1).ToList();
+            await _service.ReportGameAsync(winnerUser, loserUser);
 
             // Assert
             var result = repository.Query.OrderBy(p => p.Name).ToList();
             Assert.Equal(2, result.Count);
         }
 
-        [Fact]
-        public async Task GameReport_CreatesMatchData_1vs1_CorrectlyAssignsWinnersAndLosers()
-        {
-            // Arrange
-            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
-            
-            var repository = UnitOfWork.GetRepository<Player>();
-
-            repository.CreateMany(players);
-            UnitOfWork.Save();
-            
-            // Act
-            var match = await _service.ReportGameAsync(users.Take(1).ToList(), users.TakeLast(1).ToList());
-            
-            // Assert
-            Assert.Equal(players.First().Id, match.Winners.Single().Id);
-            Assert.Equal(players.Last().Id, match.Losers.Single().Id);
-        }
-        
         [Theory]
+        [InlineData(2)]
         [InlineData(4)]
         [InlineData(6)]
         [InlineData(8)]
-        public async Task GameReport_CreatesMatchData_TeamGame_CorrectlyAssignsWinnersAndLosers(int numPlayers)
+        public async Task GameReport_CreatesMatchData_CorrectlyAssignsWinnersAndLosers(int numPlayers)
         {
             // Arrange
             var (users, players) = TestData.GenerateUniqueRegisteredPlayers(numPlayers);
@@ -103,6 +81,88 @@ namespace TOAOLadderBot.Tests
             {
                 Assert.Contains(loserUsers, u => u.Id == loser.DiscordId);
             });
+        }
+
+        [Fact]
+        public async Task GameReport_CorrectlySetsStreak()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act
+            var winnerUser = users.Take(1).ToList();
+            var loserUser = users.TakeLast(1).ToList();
+            
+            await _service.ReportGameAsync(winnerUser, loserUser);
+            await _service.ReportGameAsync(winnerUser, loserUser);
+            await _service.ReportGameAsync(winnerUser, loserUser);
+            
+            // Assert
+            var winnerId = winnerUser.Single().Id;
+            var loserId = loserUser.Single().Id;
+
+            var winnerPlayer = repository.Query.Where(p => p.DiscordId == winnerId).Single();
+            var loserPlayer  = repository.Query.Where(p => p.DiscordId == loserId).Single();
+            
+            Assert.Equal(3, winnerPlayer.Streak);
+            Assert.Equal(-3, loserPlayer.Streak);
+        }
+        
+        [Fact]
+        public async Task GameReport_Loser_CorrectlyLosesStreak()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act
+            var player1 = users.Take(1).ToList();
+            var player2 = users.TakeLast(1).ToList();
+            
+            await _service.ReportGameAsync(player1, player2);
+            await _service.ReportGameAsync(player1, player2);
+            await _service.ReportGameAsync(player2, player1);
+            
+            // Assert
+            var lostStreakId = player1.Single().Id;
+            var lostStreakPlayer = repository.Query.Where(p => p.DiscordId == lostStreakId).Single();
+
+            Assert.Equal(-1, lostStreakPlayer.Streak);
+        }
+        
+        [Fact]
+        public async Task GameReport_Winner_CorrectlyGainsStreak()
+        {
+            // Arrange
+            var (users, players) = TestData.GenerateUniqueRegisteredPlayers(2);
+            
+            var repository = UnitOfWork.GetRepository<Player>();
+
+            repository.CreateMany(players);
+            UnitOfWork.Save();
+
+            // Act
+            var player1 = users.Take(1).ToList();
+            var player2 = users.TakeLast(1).ToList();
+            
+            await _service.ReportGameAsync(player1, player2);
+            await _service.ReportGameAsync(player1, player2);
+            await _service.ReportGameAsync(player2, player1);
+            
+            // Assert
+            var wonStreakId = player2.Single().Id;
+            var wonStreakPlayer = repository.Query.Where(p => p.DiscordId == wonStreakId).Single();
+
+            Assert.Equal(1, wonStreakPlayer.Streak);
         }
 
         [Fact]

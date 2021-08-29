@@ -39,6 +39,9 @@ namespace TOAOLadderBot.Tests
                 .With(p => p.Id, ObjectId.NewObjectId)
                 .With(p => p.DiscordId, () => userIds.Dequeue())
                 .With(p => p.Score, 75)
+                .With(p => p.Wins, 0)
+                .With(p => p.Losses, 0)
+                .With(p => p.Streak, 0)
                 .With(p => p.MatchHistory, new List<Match>())
                 .CreateMany(users.Count)
                 .ToList();
