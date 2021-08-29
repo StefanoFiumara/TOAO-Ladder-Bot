@@ -6,7 +6,6 @@ namespace TOAOLadderBot.Services
 {
     public static class LadderPointsCalculator
     {
-        // TODO: Better way of storing scoring table? How about in the DB? Configuration?
         private static readonly int[,] ScoringTable = {
             { 6,  3,   3,  1, 1, 1 },
             { 9,  6,   3,  3, 1, 1 },
