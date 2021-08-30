@@ -12,7 +12,7 @@ namespace TOAOLadderBot.Tests
         {
             var db = new LiteDatabase(":memory:");
             var context = new LiteDbContext(db);
-            UnitOfWork = new UnitOfWork(db, context);
+            UnitOfWork = new UnitOfWork(context);
         }
         public void Dispose()
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -9,11 +10,13 @@ namespace TOAOLadderBot.Commands
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
+        private readonly IServiceProvider _services;
 
         // Retrieve client and CommandService instance via ctor
-        public CommandHandler(DiscordSocketClient client, CommandService commands)
+        public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services)
         {
             _commands = commands;
+            _services = services;
             _client = client;
         }
 
@@ -30,8 +33,7 @@ namespace TOAOLadderBot.Commands
             //
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                services: null);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -59,8 +61,7 @@ namespace TOAOLadderBot.Commands
             await _commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
-                services: null);
+                services: _services);
         }
     }
 }
-    

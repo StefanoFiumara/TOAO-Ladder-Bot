@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using LiteDB;
+using Microsoft.Extensions.DependencyInjection;
 using TOAOLadderBot.Commands;
+using TOAOLadderBot.DataAccess;
+using TOAOLadderBot.Services;
 
 namespace TOAOLadderBot
 {
@@ -16,13 +21,26 @@ namespace TOAOLadderBot
         private const ulong TEST_CHANNEL = 880576178581291059;
         private const ulong TOAO_SERVER = 140956748163973120;
         private const string TOKEN_FILE = "DiscordToken.txt";
+        private const string DATABASE_PATH = "LadderData.db"; // TODO: Configurable?
 
         public static async Task Main(string[] args)
         {
             _client = new DiscordSocketClient();
             _commands = new CommandService(); // TODO: CommandServiceConfig ?
+            
+            var services = new ServiceCollection()
+                .AddSingleton(_client)
+                .AddSingleton(_commands)
+                .AddSingleton<CommandHandler>()
+                .AddTransient<GameReportingService>()
+                .AddTransient<UnitOfWork>()
+                .AddTransient<LiteDbContext>()
+                .AddSingleton(_ => new LiteDatabase(DATABASE_PATH))
+                .BuildServiceProvider();
 
-            var commandHandler = new CommandHandler(_client, _commands);
+            var commandHandler = services.GetService<CommandHandler>();
+            Debug.Assert(commandHandler != null, nameof(commandHandler) + " != null");
+            
             await commandHandler.InstallCommandsAsync();
 
             _client.Log += Log;

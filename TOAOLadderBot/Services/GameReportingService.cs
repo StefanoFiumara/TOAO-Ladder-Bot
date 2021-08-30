@@ -78,6 +78,7 @@ namespace TOAOLadderBot.Services
                 Id = ObjectId.NewObjectId(),
                 Winners = winners.ToList(),
                 Losers = losers.ToList(),
+                PointsAwarded = points,
                 ReportedDate = DateTimeOffset.UtcNow
             };
 

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace TOAOLadderBot.Tests
 {
-    public class DataAccessTests : LadderBotTestsBase, IDisposable
+    public class DataAccessTests : LadderBotTestsBase
     {
         [Fact]
         public void Create_AssignsObjectId()
