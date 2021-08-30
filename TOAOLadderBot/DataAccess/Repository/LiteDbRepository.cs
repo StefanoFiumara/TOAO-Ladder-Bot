@@ -10,21 +10,19 @@ namespace TOAOLadderBot.DataAccess.Repository
         where TEntity : class, ILiteDbDocument
     {
         private readonly LiteDbContext _context;
-        private readonly LiteDatabase _database;
 
-        public ILiteQueryable<TEntity> Query => _database.GetCollection<TEntity>().Query();
+        public ILiteQueryable<TEntity> Query => _context.Database.GetCollection<TEntity>().Query();
 
-        public LiteDbRepository(LiteDbContext context, LiteDatabase database)
+        public LiteDbRepository(LiteDbContext context)
         {
             _context = context;
-            _database = database;
         }
         
         public TEntity Create(TEntity entity)
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<TEntity>().Insert(entity);
+                _context.Database.GetCollection<TEntity>().Insert(entity);
             });
             
             return entity;
@@ -34,7 +32,7 @@ namespace TOAOLadderBot.DataAccess.Repository
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<TEntity>().InsertBulk(entities);
+                _context.Database.GetCollection<TEntity>().InsertBulk(entities);
             });
             
             return entities.Count();
@@ -44,7 +42,7 @@ namespace TOAOLadderBot.DataAccess.Repository
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<TEntity>().Update(entity);
+                _context.Database.GetCollection<TEntity>().Update(entity);
             });
 
             return entity;
@@ -54,7 +52,7 @@ namespace TOAOLadderBot.DataAccess.Repository
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<TEntity>().Upsert(entity);
+                _context.Database.GetCollection<TEntity>().Upsert(entity);
             });
 
             return entity;
@@ -64,7 +62,7 @@ namespace TOAOLadderBot.DataAccess.Repository
         {
             _context.AddCommand(() =>
             {
-                _database.GetCollection<TEntity>().Delete(entity.Id);
+                _context.Database.GetCollection<TEntity>().Delete(entity.Id);
             });
 
             return entity;

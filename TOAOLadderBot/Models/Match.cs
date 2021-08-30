@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using LiteDB;
 using TOAOLadderBot.DataAccess;
 
@@ -12,6 +13,8 @@ namespace TOAOLadderBot.Models
         
         public DateTimeOffset ReportedDate { get; init; }
         
+        public int PointsAwarded { get; init; }
+        
         [BsonRef(nameof(Player))]
         public List<Player> Winners { get; init; }
         
@@ -20,11 +23,18 @@ namespace TOAOLadderBot.Models
         
         public override string ToString()
         {
-            var winners = string.Join(", ", Winners.Select(w => w.Name));
-            var losers = string.Join(", ", Losers.Select(l => l.Name));
+            var sb = new StringBuilder();
+            var winners = string.Join("\n", Winners.Select(w => w.Name));
+            var losers = string.Join("\n", Losers.Select(l => l.Name));
 
             var s = Winners.Count == 1 ? "s" : string.Empty;
-            return $"{ReportedDate:g} -- {winners} defeat{s} {losers}";
+            var notS = Winners.Count != 1 ? "s" : string.Empty;
+
+            sb.AppendLine($"\n{winners}\n---- DEFEAT{s.ToUpper()} ----\n{losers}\n");
+            sb.AppendLine($"This match was recorded on {ReportedDate:yyyy-MM-dd hh:mm tt \"UTC\"}");
+            sb.AppendLine($"The winner{notS} take{s} {PointsAwarded} points from the loser{notS}, GG!");
+            
+            return sb.ToString();
         }
 
         public bool Equals(Match other)
