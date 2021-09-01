@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -80,9 +79,10 @@ namespace TOAOLadderBot.Commands.CommandModules
                 }
                 catch (Exception e)
                 {
-                    await ReplyAsync($"Dude! Somebody went wrong and you made me crash! Your report was not counted! A crash log has be DM'd to the administrators.");
+                    await ReplyAsync($"Sorry! Some unexpected error happened while processing your report! A crash log has be DM'd to the ladder admin.\nError Message: {e.Message}");
                     
-                    throw;
+                    var admin = Context.Client.GetUser(Constants.ADMIN_USER_ID);
+                    await admin.SendMessageAsync($"{Context.User.Username} ran into an unhandled exception while reporting a game.\nThe command they tried to execute was: {Context.Message.Content}\nFull exception: \n{e}");
                 }
             }
             else
@@ -90,7 +90,6 @@ namespace TOAOLadderBot.Commands.CommandModules
                 await Context.Message.AddReactionAsync(ThumbsDown);
                 await ReplyAsync($"Sorry {Context.User.Mention}, your report cannot be counted since you are not one of the participants in the match!");
             }
-            
         }
     }
 }

@@ -4,6 +4,17 @@ using TOAOLadderBot.Models;
 
 namespace TOAOLadderBot.Services
 {
+    // TODO: Modernized rank names
+    public enum Rank
+    {
+        Expert, 
+        Upper, 
+        Inter, 
+        Grook, 
+        Rook, 
+        Newbie
+    }
+
     public static class LadderPointsCalculator
     {
         private static readonly int[,] ScoringTable = {

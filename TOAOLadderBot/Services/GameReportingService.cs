@@ -44,6 +44,41 @@ namespace TOAOLadderBot.Services
             });
         }
 
+        private (List<Player> winnerTeam, List<Player> loserTeam) FindOrCreateLadderPlayers(List<IUser> winners, List<IUser> losers)
+        {
+            var players = new List<Player>();
+            var allUsers = winners.Concat(losers).ToList();
+
+            // NOTE: Map to list of Ids for query since otherwise the LiteDB provider will try to serialize the entire IUser object
+            var playerIds = allUsers.Select(u => u.Id).ToList();
+            var existingPlayers = _playerRepository.Query.Where(p => playerIds.Any(id => id == p.DiscordId)).ToList();
+            
+            var newPlayers = allUsers.Where(u => existingPlayers.All(p => p.DiscordId != u.Id)).ToList();
+            
+            foreach (var user in newPlayers)
+            {
+                var player = new Player
+                {
+                    Id = ObjectId.NewObjectId(),
+                    DiscordId = user.Id,
+                    Name = user.Username,
+                    Score = 75,
+                    Wins = 0,
+                    Losses = 0,
+                    Streak = 0,
+                    MatchHistory = new List<Match>()
+                };
+
+                players.Add(player);
+            }
+            
+            players.AddRange(existingPlayers);
+
+            var winnerTeam = players.Where(p => winners.Any(w => w.Id == p.DiscordId)).ToList();
+            var loserTeam = players.Where(p => losers.Any(l => l.Id == p.DiscordId)).ToList();
+            return (winnerTeam, loserTeam);
+        }
+
         private Match ReportGame(List<Player> winners, List<Player> losers)
         {
             var winnerScoreAvg = winners.Select(p => p.Score).Average();
@@ -92,41 +127,6 @@ namespace TOAOLadderBot.Services
             
             _unitOfWork.Save();
             return match;
-        }
-
-        private (List<Player> winnerTeam, List<Player> loserTeam) FindOrCreateLadderPlayers(List<IUser> winners, List<IUser> losers)
-        {
-            var players = new List<Player>();
-            var users = winners.Concat(losers).ToList();
-
-            // NOTE: Map to list of Ids since otherwise the LiteDB provider will try to serialize the entire IUser object when we query
-            var playerIds = users.Select(u => u.Id).ToList();
-            var existingPlayers = _playerRepository.Query.Where(p => playerIds.Any(id => id == p.DiscordId)).ToList();
-            
-            var newPlayers = users.Where(u => existingPlayers.All(p => p.DiscordId != u.Id)).ToList();
-            
-            foreach (var user in newPlayers)
-            {
-                var player = new Player
-                {
-                    Id = ObjectId.NewObjectId(),
-                    DiscordId = user.Id,
-                    Name = user.Username,
-                    Score = 75,
-                    Wins = 0,
-                    Losses = 0,
-                    Streak = 0,
-                    MatchHistory = new List<Match>()
-                };
-
-                players.Add(player);
-            }
-            
-            players.AddRange(existingPlayers);
-
-            var winnerTeam = players.Where(p => winners.Any(w => w.Id == p.DiscordId)).ToList();
-            var loserTeam = players.Where(p => losers.Any(l => l.Id == p.DiscordId)).ToList();
-            return (winnerTeam, loserTeam);
         }
     }
 }

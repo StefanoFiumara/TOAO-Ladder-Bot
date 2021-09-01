@@ -24,7 +24,7 @@ namespace TOAOLadderBot.Models
         public int GamesPlayed => Wins + Losses;
 
         public Rank Rank => LadderPointsCalculator.CalculateRank(Score);
-        public float WinPercent => GamesPlayed > 0 ? (float) Wins / GamesPlayed : 0.0f;
+        public float WinPercent => GamesPlayed > 0 ? (float) Wins / GamesPlayed * 100f : 0.0f;
 
         public bool Equals(Player other)
         {

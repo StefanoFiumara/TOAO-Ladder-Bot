@@ -15,10 +15,12 @@ namespace TOAOLadderBot
 {
     public static class Constants
     {
+        // TODO: Do any of these need the pulled into a configuration file?
         public const string TOKEN_FILE = "DiscordToken.txt";
-        public const string DATABASE_PATH = "LadderData.db"; // TODO: Configurable DB name? Backups?
+        public const string DATABASE_PATH = "LadderData.db"; 
         public const ulong TOAO_SERVER_ID = 140956748163973120;
         public const ulong LADDER_CHANNEL_ID = 880576178581291059;
+        public const ulong ADMIN_USER_ID = 104988834017607680; // Fano
     }
     public static class Program
     {
@@ -33,11 +35,12 @@ namespace TOAOLadderBot
             var services = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
+                .AddSingleton(_ => new LiteDatabase(Constants.DATABASE_PATH))
                 .AddSingleton<CommandHandler>()
                 .AddTransient<GameReportingService>()
+                .AddTransient<StatsService>()
                 .AddTransient<UnitOfWork>()
                 .AddTransient<LiteDbContext>()
-                .AddSingleton(_ => new LiteDatabase(Constants.DATABASE_PATH))
                 .BuildServiceProvider();
 
             var commandHandler = services.GetService<CommandHandler>();
