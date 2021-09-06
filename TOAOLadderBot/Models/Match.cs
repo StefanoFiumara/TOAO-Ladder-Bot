@@ -37,6 +37,21 @@ namespace TOAOLadderBot.Models
             return sb.ToString();
         }
 
+        public string ToHistoryString(ulong povDiscordId)
+        {
+            if (Winners.Any(p => p.DiscordId == povDiscordId))
+            {
+                return $"Won vs {string.Join(", ", Losers.Select(l => l.Name))} | +{PointsAwarded}";
+            }
+
+            if (Losers.Any(p => p.DiscordId == povDiscordId))
+            {
+                return $"Lost vs {string.Join(", ", Winners.Select(l => l.Name))} | -{PointsAwarded}";
+            }
+
+            return string.Empty;
+        }
+        
         public bool Equals(Match other)
         {
             if (ReferenceEquals(null, other)) return false;
