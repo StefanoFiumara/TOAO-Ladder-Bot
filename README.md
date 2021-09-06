@@ -1,7 +1,7 @@
 # TOAO Ladder Bot
 A Discord bot to record TOAO Ladder games
 
-## Commands (WIP)
+## Commands
 * !report
     * Reports a ladder match
     * `!report @A defeats @B`
@@ -30,3 +30,6 @@ A Discord bot to record TOAO Ladder games
         * history of @A's last 5 matches
     * `!history @A 20`
         * history of @A's last 20 matches
+
+* !leaderboard
+  * Shows the current ladder leaderboards

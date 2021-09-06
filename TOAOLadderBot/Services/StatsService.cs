@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using TOAOLadderBot.DataAccess;
@@ -54,7 +55,7 @@ namespace TOAOLadderBot.Services
                     .Limit(count)
                     .ToList());
             
-            if (matches == null || matches.Count == 0)
+            if (matches.Count == 0)
             {
                 return $"There is no match history for this player!";
             }
@@ -64,6 +65,47 @@ namespace TOAOLadderBot.Services
                 .ToList();
 
             return string.Join("\n", history);
+        }
+
+        public async Task<string> GetLeaderboardAsync()
+        {
+            var players = await Task.Run(() => _playerRepository.Query.OrderByDescending(p => p.Score).ToList());
+
+            var sb = new StringBuilder();
+            sb.AppendLine("```");
+            var headers = new[] { "Rank", "Name", "Score", "Streak", "Win %" };
+
+            int rankWidth = headers[0].Length; // NOTE: very unlikely to need more than 4 characters for this column unless we have more than 999 players...
+
+            int nameWidth = players.Select(p => p.Name).Select(s => s.Length).Max();
+            nameWidth = nameWidth > headers[1].Length ? nameWidth : headers[1].Length;
+            
+            int scoreWidth = players.Select(p => $"{p.Score}").Select(s => s.Length).Max();
+            scoreWidth = scoreWidth > headers[2].Length ? scoreWidth : headers[2].Length;
+            
+            int streakWidth = headers[3].Length;
+            int winPWidth = "100.00%".Length; // Hardcoded
+
+            var header = $"{headers[0].PadRight(rankWidth)} | {headers[1].PadRight(nameWidth)} | {headers[2].PadRight(scoreWidth)} | {headers[3].PadRight(streakWidth)} | {headers[4].PadRight(winPWidth)}";
+            var underline = $"{new string('=', rankWidth)} | {new string('=', nameWidth)} | {new string('=', scoreWidth)} | {new string('=', streakWidth)} | {new string('=', winPWidth)}";
+
+            sb.AppendLine(header);
+            sb.AppendLine(underline);
+
+            for (var i = 0; i < players.Count; i++)
+            {
+                var p = players[i];
+                var rank = $"#{i + 1}".PadRight(rankWidth);
+                var name = p.Name.PadRight(nameWidth);
+                var score = $"{p.Score}".PadRight(scoreWidth);
+                var streak = $"{p.Streak}".PadRight(streakWidth);
+                var winP = $"{p.WinPercent:P}".PadRight(winPWidth);
+
+                sb.AppendLine($"{rank} | {name} | {score} | {streak} | {winP}");
+            }
+            
+            sb.AppendLine("```");
+            return sb.ToString();
         }
     }
 }

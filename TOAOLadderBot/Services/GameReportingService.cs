@@ -37,6 +37,9 @@ namespace TOAOLadderBot.Services
             if (winners.Count != losers.Count)
                 throw new GameReportException("Teams are uneven, this is not allowed!");
 
+            if (allPlayers.Any(u => u.IsBot))
+                throw new GameReportException("Bots are not allowed to participate in ladder games!");
+
             return await Task.Run(() =>
             {
                 var (winnerTeam, loserTeam) = FindOrCreateLadderPlayers(winners, losers);

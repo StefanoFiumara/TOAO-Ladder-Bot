@@ -28,11 +28,11 @@ namespace TOAOLadderBot.Commands.CommandModules
         [Summary("Reports a ladder game")]
         public async Task ReportGameAsync([Remainder] string text)
         {
-            if (Context.Channel.Id != Constants.LADDER_CHANNEL_ID)
+            if (Context.Channel.Id != Constants.LADDER_REPORTS_CHANNEL_ID)
             {
                 var ladderChannel = Context.Client
                     .GetGuild(Constants.TOAO_SERVER_ID)
-                    .GetTextChannel(Constants.LADDER_CHANNEL_ID);
+                    .GetTextChannel(Constants.LADDER_REPORTS_CHANNEL_ID);
 
                 await Context.Message.AddReactionAsync(ThumbsDown);
                 await ReplyAsync($"Hey {Context.User.Mention}! You're in the wrong channel! Please use {ladderChannel.Mention} to report ladder games!");

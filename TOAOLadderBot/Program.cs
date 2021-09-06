@@ -17,9 +17,10 @@ namespace TOAOLadderBot
     {
         // TODO: Do any of these need the pulled into a configuration file?
         public const string TOKEN_FILE = "DiscordToken.txt";
-        public const string DATABASE_PATH = "LadderData.db"; 
+        public const string DATABASE_PATH_DEBUG = "Debug-LadderData.db"; 
+        public const string DATABASE_PATH_RELEASE = "TOAO-LadderData.db";
         public const ulong TOAO_SERVER_ID = 140956748163973120;
-        public const ulong LADDER_CHANNEL_ID = 880576178581291059;
+        public const ulong LADDER_REPORTS_CHANNEL_ID = 884515940421763172; // #report-ladder-games
         public const ulong ADMIN_USER_ID = 104988834017607680; // Fano
     }
     public static class Program
@@ -32,17 +33,23 @@ namespace TOAOLadderBot
             _client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true });
             _commands = new CommandService();
 
-            var services = new ServiceCollection()
+            var serviceCollection = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
-                .AddSingleton(_ => new LiteDatabase(Constants.DATABASE_PATH))
                 .AddSingleton<CommandHandler>()
                 .AddTransient<GameReportingService>()
                 .AddTransient<StatsService>()
                 .AddTransient<UnitOfWork>()
                 .AddTransient<LiteDbContext>()
-                .BuildServiceProvider();
+                ;
 
+            #if DEBUG
+                serviceCollection.AddSingleton(_ => new LiteDatabase(Constants.DATABASE_PATH_DEBUG));
+            #else
+                serviceCollection.AddSingleton(_ => new LiteDatabase(Constants.DATABASE_PATH_RELEASE)); 
+            #endif
+            
+            var services = serviceCollection.BuildServiceProvider();
             var commandHandler = services.GetService<CommandHandler>();
             Debug.Assert(commandHandler != null, nameof(commandHandler) + " != null");
             
@@ -63,7 +70,7 @@ namespace TOAOLadderBot
         {
             await _client
                 .GetGuild(Constants.TOAO_SERVER_ID)
-                .GetTextChannel(Constants.LADDER_CHANNEL_ID)
+                .GetTextChannel(Constants.LADDER_REPORTS_CHANNEL_ID)
                 .SendMessageAsync("TOAO Ladder Bot Is Now Connected!");
 
             // TODO: Possible to check for missed commands while the bot was offline?

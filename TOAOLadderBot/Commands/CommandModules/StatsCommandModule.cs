@@ -83,5 +83,24 @@ namespace TOAOLadderBot.Commands.CommandModules
                 await admin.SendMessageAsync($"{Context.User.Username} ran into an unhandled exception while querying match history.\nThe command they tried to execute was: {Context.Message.Content}\nFull exception: \n{e}");
             }
         }
+
+        [Command("leaderboard")]
+        public async Task GetLeaderboardAsync()
+        {
+            try
+            {
+                var leaderboard = await _service.GetLeaderboardAsync();
+                await Context.Message.AddReactionAsync(OkHand);
+                await ReplyAsync($"{Context.User.Mention} Here are the current ladder standings!\n{leaderboard}");
+            }
+            catch(Exception e)
+            {
+                await Context.Message.AddReactionAsync(ThumbsDown);
+                await ReplyAsync($"Sorry! Some unexpected error happened while getting the ladder standings! A crash log has be DM'd to the ladder admin.\nError Message: {e.Message}");
+                    
+                var admin = Context.Client.GetUser(Constants.ADMIN_USER_ID);
+                await admin.SendMessageAsync($"{Context.User.Username} ran into an unhandled exception while querying ladder rankings.\nThe command they tried to execute was: {Context.Message.Content}\nFull exception: \n{e}");
+            }
+        }
     }
 }
