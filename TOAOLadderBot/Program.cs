@@ -16,6 +16,7 @@ namespace TOAOLadderBot
     public static class Constants
     {
         // TODO: Do any of these need the pulled into a configuration file?
+        // TODO: Adjust some of these based on release configuration?
         public const string TOKEN_FILE = "DiscordToken.txt";
         public const string DATABASE_PATH_DEBUG = "Debug-LadderData.db"; 
         public const string DATABASE_PATH_RELEASE = "TOAO-LadderData.db";

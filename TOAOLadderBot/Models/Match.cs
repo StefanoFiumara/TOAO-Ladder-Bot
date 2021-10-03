@@ -41,12 +41,12 @@ namespace TOAOLadderBot.Models
         {
             if (Winners.Any(p => p.DiscordId == povDiscordId))
             {
-                return $"Won vs {string.Join(", ", Losers.Select(l => l.Name))} | +{PointsAwarded}";
+                return $"{ReportedDate:d} - Won vs {string.Join(", ", Losers.Select(l => l.Name))} | +{PointsAwarded}";
             }
 
             if (Losers.Any(p => p.DiscordId == povDiscordId))
             {
-                return $"Lost vs {string.Join(", ", Winners.Select(l => l.Name))} | -{PointsAwarded}";
+                return $"{ReportedDate:d} - Lost vs {string.Join(", ", Winners.Select(l => l.Name))} | -{PointsAwarded}";
             }
 
             return string.Empty;

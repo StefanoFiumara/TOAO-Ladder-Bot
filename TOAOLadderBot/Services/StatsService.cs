@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,51 +62,33 @@ namespace TOAOLadderBot.Services
             }
 
             var history = matches
-                .Select(m => m.ToHistoryString(userId))
+                .Select((m, i) => $"#{i} | {m.ToHistoryString(userId)}")
                 .ToList();
 
-            return string.Join("\n", history);
+                return $"```\n{string.Join("\n", history)}\n```";
         }
 
         public async Task<string> GetLeaderboardAsync()
         {
             var players = await Task.Run(() => _playerRepository.Query.OrderByDescending(p => p.Score).ToList());
 
-            var sb = new StringBuilder();
-            sb.AppendLine("```");
-            var headers = new[] { "Rank", "Name", "Score", "Streak", "Win %" };
+            return GetPlayerTable(players);
+        }
 
-            int rankWidth = headers[0].Length; // NOTE: very unlikely to need more than 4 characters for this column unless we have more than 999 players...
+        private string GetPlayerTable(List<Player> players)
+        {
+            var headers = new List<string> { "Name", "Score", "Rank", "Streak", "Win %" };
 
-            int nameWidth = players.Select(p => p.Name).Select(s => s.Length).Max();
-            nameWidth = nameWidth > headers[1].Length ? nameWidth : headers[1].Length;
-            
-            int scoreWidth = players.Select(p => $"{p.Score}").Select(s => s.Length).Max();
-            scoreWidth = scoreWidth > headers[2].Length ? scoreWidth : headers[2].Length;
-            
-            int streakWidth = headers[3].Length;
-            int winPWidth = "100.00%".Length; // Hardcoded
-
-            var header = $"{headers[0].PadRight(rankWidth)} | {headers[1].PadRight(nameWidth)} | {headers[2].PadRight(scoreWidth)} | {headers[3].PadRight(streakWidth)} | {headers[4].PadRight(winPWidth)}";
-            var underline = $"{new string('=', rankWidth)} | {new string('=', nameWidth)} | {new string('=', scoreWidth)} | {new string('=', streakWidth)} | {new string('=', winPWidth)}";
-
-            sb.AppendLine(header);
-            sb.AppendLine(underline);
-
-            for (var i = 0; i < players.Count; i++)
+            var headerMap = new Dictionary<string, Func<Player, string>>
             {
-                var p = players[i];
-                var rank = $"#{i + 1}".PadRight(rankWidth);
-                var name = p.Name.PadRight(nameWidth);
-                var score = $"{p.Score}".PadRight(scoreWidth);
-                var streak = $"{p.Streak}".PadRight(streakWidth);
-                var winP = $"{p.WinPercent:P}".PadRight(winPWidth);
-
-                sb.AppendLine($"{rank} | {name} | {score} | {streak} | {winP}");
-            }
+                { headers[0], t => t.Name },
+                { headers[1], t => $"{t.Score}" },
+                { headers[2], t => $"{t.Rank}" },
+                { headers[3], t => $"{t.Streak}" },
+                { headers[4], t => $" {t.WinPercent:P}" },
+            };
             
-            sb.AppendLine("```");
-            return sb.ToString();
+            return Utils.FormatTable(headers, players, headerMap, useIndex: true);
         }
     }
 }

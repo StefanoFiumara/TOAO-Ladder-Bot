@@ -1,5 +1,4 @@
 TOAO Ladder Bot FAQ
-v1.0
 
 Here are the available commands you can issue to the ladder bot!
 
