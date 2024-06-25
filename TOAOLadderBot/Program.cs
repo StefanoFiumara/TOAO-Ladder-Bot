@@ -15,14 +15,16 @@ namespace TOAOLadderBot
 {
     public static class Constants
     {
-        // TODO: Do any of these need the pulled into a configuration file?
+        // TODO: these constants should instead be pulled from a config file for security.
         public const string TOKEN_FILE = "DiscordToken.txt";
         public const string DATABASE_PATH_DEBUG = "Debug-LadderData.db"; 
         public const string DATABASE_PATH_RELEASE = "TOAO-LadderData.db";
-        public const ulong TOAO_SERVER_ID = 140956748163973120;
-        public const ulong LADDER_REPORTS_CHANNEL_ID = 884515940421763172; // #report-ladder-games
-        public const ulong ADMIN_USER_ID = 104988834017607680; // Fano
+        
+        public const ulong TOAO_SERVER_ID = 0; // Discord server ID for the bot to join
+        public const ulong LADDER_REPORTS_CHANNEL_ID = 0;  // Channel ID in the given server where players are to report ladder games
+        public const ulong ADMIN_USER_ID = 0; // Admin user of the bot where bug reports and exception stack traces can be sent
     }
+    
     public static class Program
     {
         private static DiscordSocketClient _client;
